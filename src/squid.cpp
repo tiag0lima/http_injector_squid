@@ -29,10 +29,14 @@ void squid::configure() {
 }
 
 
-
 void squid::incomingConnection(qintptr desc) {
 	qDebug() << "new connection incoming";
+
 	TSocket *sock = new TSocket(desc);
+	connect (sock, &TSocket::onClose, [](TSocket *s) {
+		qDebug() << "deleting one connection";
+		s->deleteLater();
+	});
 	sock->setLogo(mLogo);
 	sock->setFirstIncommingMessage(parseFistsRequets);
 	sock->setStreamHost(mStreamHost);

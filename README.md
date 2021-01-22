@@ -1,6 +1,6 @@
 #HTTP INJECTOR SQUID
 
-To build need install
+To build , you need install
 ```
 apt install -y qt5-default build-essential qt5-qmake
 ```

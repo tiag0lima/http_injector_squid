@@ -1,5 +1,4 @@
 #include "TSocket.h"
-#include "status.h"
 #include <unistd.h>
 
 
@@ -21,7 +20,6 @@ bool TSocket::connectStream(QString host, qintptr port) {
 }
 
 void TSocket::configure() {
-	setFirstIncommingMessage([](QTcpSocket*) { return false; });	
 	
 
 	QObject::connect (this, &QTcpSocket::readyRead, [&] () {

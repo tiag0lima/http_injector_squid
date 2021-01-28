@@ -1,24 +1,22 @@
 #ifndef __PARSER_H__
 #define __PARSER_H__
 
+#include <QDir>
+#include <QDebug>
 #include <QString>
+#include <QVariant>
 #include <QStringList>
-
-typedef struct Data {
-	int SOURCE_PORT;
-	int DEST_PORT;
-	QString SOURCE_HOST = "0.0.0.0";
-	QString DEST_HOST = "127.0.0.1";
-} Data;
+#include "Data.h"
 
 void show_usage(QString reason, QString name) {
 	qDebug() << reason 
-		<< "\n\nusage: " << name << " [options] <SOURCE_PORT> <DESTINATION_PORT>\n"
-		<< "\n\tSOURCE_PORT\t\tit will accept connections on port"
-		<< "\n\tDESTINATION_PORT\twill redirect all input to port"
-		<< "\n\noptions:"
-		<< "\n\t--source_host source_host\tchange source host"
-		<< "\n\t--dest_host destination_host\tchange destination host"
+		<< "\n\nusage: " << name << " [options]\n"
+		<< "\noptions:"
+		<< "\n\t--source-port source_port\tdefault 80"
+		<< "\n\t--dest-port dest_port\tdefault 22"
+		<< "\n\t--source-host source_host\tdefault 0.0.0.0"
+		<< "\n\t--dest-host destination_host\tdefault 127.0.0.1"
+		<< "\n\t--users-folder users_folder\tdefault /var/squid/users"
 		<< "\n\t--help\t\t\tshow this message";
 }
 
@@ -51,6 +49,22 @@ QString getParameter(QStringList &params, QString param) {
 }
 
 
+bool fix_dir(QString dirname) {
+	if (not QDir().mkpath(dirname)) {
+		qDebug() << "Cannot create path " << dirname;
+		return false;
+	}
+	return true;
+}
+
+
+template<class T>
+void setParameter(T &d, QString s) {
+	if (s != QString())
+		d = QVariant(s).value<T>();
+}
+
+
 bool parse_parameter(char *argv[], int argc, Data &data) {
 	QStringList mArgs = toQStringList(argv, argc);
 
@@ -62,26 +76,21 @@ bool parse_parameter(char *argv[], int argc, Data &data) {
 	if (has_parameter(mArgs, "--help"))
 		return incorrect("");
 	
-	QString source_host = getParameter(mArgs, "--source_host");
-	if (source_host != QString())
-		data.SOURCE_HOST = source_host;
+	setParameter(data.SOURCE_PORT, getParameter(mArgs, "--source-port"));
+	setParameter(data.DEST_PORT, getParameter(mArgs, "--dest-port"));
+
+	setParameter(data.SOURCE_HOST,  getParameter(mArgs, "--source-host"));
+	setParameter(data.DEST_HOST, getParameter(mArgs, "--dest-host"));
+
+	setParameter(data.USERS_FOLDER, getParameter(mArgs, "--users-folder"));
+
+	mArgs.removeAll(argv[0]); //remove ./thisProgram
+	if (mArgs.count() > 0)
+		return incorrect("unknown:\n\t"+mArgs.join("\n\t"));
 	
-
-	QString dest_host = getParameter(mArgs, "--dest_host");
-	if (dest_host != QString())
-		data.DEST_HOST = dest_host;
-
-	if (mArgs.length() != 3)
-		return incorrect(QString("[%1] SOURCE_PORT and DESTINATION_PORT not found.").arg(mArgs.length()));
-
-	bool ok;
-	data.SOURCE_PORT = mArgs[1].toInt(&ok);
-	if (not ok) return incorrect("SOURCE_PORT unknown");
-
-	data.DEST_PORT = mArgs[2].toInt(&ok);
-	if (not ok) return incorrect("DESTINATION_PORT unknown");
-
-	return true;
+	return fix_dir(data.USERS_FOLDER);
 }
+
+
 
 #endif

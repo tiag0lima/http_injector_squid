@@ -4,11 +4,10 @@
 #include <QThread>
 #include <unistd.h>
 #include <sys/socket.h>
-#include "FirstRequests.h"
+#include "FirstRequest.h"
 #define MAX 1024
 
 squid::squid(QObject *parent) : QTcpServer(parent){
-	mLogo = [this]() { return HTTP_OK; };
 };
 
 
@@ -21,6 +20,7 @@ void squid::configure() {
 	QHostAddress sourceHost = QHostAddress(mSourceHost);
 	if (not listen(sourceHost, mSourcePort)) {
 		qDebug() << "can't listen on " << mSourceHost << ":" << mSourcePort;
+		emit exit(0);
 		return;
 	}
 
@@ -37,16 +37,17 @@ void squid::incomingConnection(qintptr desc) {
 		qDebug() << "deleting one connection";
 		s->deleteLater();
 	});
-	sock->setLogo(mLogo);
-	sock->setFirstIncommingMessage(parseFistsRequets);
+
+	sock->setFirstIncommingMessage(parseFirstRequest);
 	sock->setStreamHost(mStreamHost);
 	sock->setStreamPort(mStreamPort);
+	sock->setUsersFolder(mUsersFolder);
 }
 
 
 
-void squid::setCustomLogo(std::function<QString (void)> customLogo) {
-	mLogo = customLogo;	
+void squid::setUsersFolder(QString usersFolder) {
+	mUsersFolder =  usersFolder;
 }
 
 

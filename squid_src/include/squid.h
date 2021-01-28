@@ -15,7 +15,8 @@ public:
 	squid(QObject *parent=nullptr);
 
 	void run();
-
+	
+	void setUsersFolder(QString);
 	void setSourceHost(QString);
 	QString sourceHost();
 	void setSourcePort(qintptr);
@@ -26,7 +27,8 @@ public:
 	QString destinationHost();
 	qintptr destinationPort();
 
-	void setCustomLogo(std::function<QString (void)>);
+signals:
+	void exit(int);
 
 protected:
 	void incomingConnection(qintptr desc);
@@ -34,12 +36,13 @@ protected:
 private:
 	void configure();
 
-	QString mSourceHost{"0.0.0.0"},
-		mStreamHost{"127.0.0.1"};
-	qintptr mSourcePort{80}, mStreamPort{22};
+	QString mSourceHost,
+		mStreamHost;
+	qintptr mSourcePort, 
+		mStreamPort;
 
 	QTcpServer *mServer;
-	std::function<QString (void)> mLogo;
+	QString mUsersFolder;
 };
 
 

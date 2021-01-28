@@ -11,9 +11,9 @@ qmake
 make
 ```
 
-Then to forward port 80 to 22
+then have fun
 ```
-./main 80 22
+./main
 ```
 
 You can see more options with

@@ -21,10 +21,4 @@ You can see more options with
 ./main --help
 ```
 
-To custom first http response, edit file ./src/CustomLogo1.cpp.
-And replace
-```
-return tr(....)
-```
-For anithing else.
 
